@@ -1,13 +1,9 @@
 package id.widiarifki.compose.feature
 
-import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -15,8 +11,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.focusTarget
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -28,12 +22,9 @@ import id.widiarifki.compose.data.entity.ShoppingItem
 @Composable
 fun ShoppingListScreen(
     shoppingItems: List<ShoppingItem>,
-    currentlyEditing: ShoppingItem?,
     onAddItem: (ShoppingItem) -> Unit,
     onToggleTickItem: (ShoppingItem) -> Unit,
-    onDeleteItem: (ShoppingItem) -> Unit,
-    onEditItemSelected: (ShoppingItem) -> Unit,
-    onEditItemChange: (ShoppingItem) -> Unit
+    onDeleteItem: (ShoppingItem) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxHeight()) {
         if (shoppingItems.isEmpty()) {
@@ -61,14 +52,14 @@ fun ShoppingListScreen(
                     items = shoppingItems,
                     key = { item -> item.id }
                 ) { item ->
-                    ShoppingItemCard(item, onToggleTickItem, onDeleteItem, onEditItemSelected)
+                    ShoppingItemCard(item, onToggleTickItem, onDeleteItem)
                     Spacer(modifier = Modifier.height(8.dp))
                 }
             }
         }
 
         // Form input new item
-        InputItemContainer(currentlyEditing, onAddItem, onEditItemChange)
+        InputItemContainer(onAddItem)
     }
 }
 
@@ -77,8 +68,7 @@ fun ShoppingListScreen(
 fun ShoppingItemCard(
     shoppingItem: ShoppingItem,
     onToggleTickItem: (ShoppingItem) -> Unit,
-    onDeleteItem: (ShoppingItem) -> Unit,
-    onEditItemSelected: (ShoppingItem) -> Unit
+    onDeleteItem: (ShoppingItem) -> Unit
 ) {
     val swipeToDismissState = rememberDismissState(
         confirmStateChange = {
@@ -119,18 +109,7 @@ fun ShoppingItemCard(
                     modifier = Modifier.weight(1f)
                 )
 
-                // Edit button
-                IconButton(
-                    modifier = Modifier.height(IntrinsicSize.Min).background(Color.Blue),
-                    onClick = {
-                        Log.d("TESS", shoppingItem.name)
-                        onEditItemSelected(shoppingItem)
-                    }
-                ) {
-                    Icon(imageVector = Icons.Filled.Edit, contentDescription = "Edit")
-                }
-
-                // Done check
+                // Done checkbox
                 Checkbox(
                     checked = shoppingItem.isTicked,
                     onCheckedChange = {
@@ -144,11 +123,9 @@ fun ShoppingItemCard(
 
 @Composable
 fun InputItemContainer(
-    currentlyEditing: ShoppingItem? = null,
-    onAddItem: (ShoppingItem) -> Unit,
-    onEditItemChange: (ShoppingItem) -> Unit
+    onAddItem: (ShoppingItem) -> Unit
 ) {
-    var itemName = currentlyEditing?.name ?: "" //by remember { mutableStateOf(currentlyEditing?.name ?: "") }
+    var itemName by remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
 
     Row(
@@ -161,21 +138,13 @@ fun InputItemContainer(
             label = { Text("Item belanja baru") },
             singleLine = true,
             onValueChange = { newValue -> itemName = newValue },
-            value = itemName,
-            modifier = Modifier.weight(1f).then(
-                if (itemName.isEmpty().not()) Modifier.focusTarget()
-                else Modifier
-            )
+            value = itemName
         )
         Spacer(modifier = Modifier.width(8.dp))
         Button(
             enabled = itemName.isNotBlank(),
             onClick = {
-                currentlyEditing?.let { editItem ->
-                    onEditItemChange(editItem.copy(name = itemName))
-                } ?: run {
-                    onAddItem(ShoppingItem(name = itemName))
-                }
+                onAddItem(ShoppingItem(name = itemName))
                 itemName = ""
                 focusManager.clearFocus()
             },
@@ -197,7 +166,7 @@ fun PreviewShoppingListScreen() {
 
     MaterialTheme {
         ShoppingListScreen(
-            previewItems, null, {}, {}, {}, {}, {}
+            previewItems, {}, {}, {}
         )
     }
 }

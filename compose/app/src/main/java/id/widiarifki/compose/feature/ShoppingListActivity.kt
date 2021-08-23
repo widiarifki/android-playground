@@ -34,12 +34,9 @@ fun ShoppingListView(viewModel: ShoppingListViewModel) {
     MaterialTheme {
         ShoppingListScreen(
             shoppingItems = shoppingItems,
-            currentlyEditing = viewModel.currentEditItemState,
             onAddItem = viewModel::addItem,
             onToggleTickItem = viewModel::toggleTickItem,
-            onDeleteItem = viewModel::deleteItem,
-            onEditItemSelected = viewModel::onEditItemSelected,
-            onEditItemChange = viewModel::onEditItemChange
+            onDeleteItem = viewModel::deleteItem
         )
     }
 }
