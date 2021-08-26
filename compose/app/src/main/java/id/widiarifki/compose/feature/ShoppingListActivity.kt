@@ -27,6 +27,10 @@ class ShoppingListActivity : ComponentActivity() {
 @Composable
 fun ShoppingListView(viewModel: ShoppingListViewModel) {
 
+    /**
+     * observeAsState() can only be called from Composable function
+     * to observing LiveData and represent its value via State
+     */
     val shoppingItems: List<ShoppingItem> = viewModel.shoppingItems
         .observeAsState(listOf())
         .value

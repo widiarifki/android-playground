@@ -12,7 +12,7 @@ class ShoppingListViewModel(
     private val repository: ShoppingItemRepository = ShoppingItemRepository()
 ) : ViewModel() {
 
-    // state variables
+    // variables that has state
     val shoppingItems: LiveData<List<ShoppingItem>> = repository.allShoppingItems
 
     // event: add item

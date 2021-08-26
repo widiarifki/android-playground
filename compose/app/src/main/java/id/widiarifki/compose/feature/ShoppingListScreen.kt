@@ -26,7 +26,9 @@ fun ShoppingListScreen(
     onToggleTickItem: (ShoppingItem) -> Unit,
     onDeleteItem: (ShoppingItem) -> Unit
 ) {
+    // Content container
     Column(modifier = Modifier.fillMaxHeight()) {
+        // Empty state / List ?
         if (shoppingItems.isEmpty()) {
             // Empty state
             Box(
@@ -52,14 +54,17 @@ fun ShoppingListScreen(
                     items = shoppingItems,
                     key = { item -> item.id }
                 ) { item ->
+                    // Composable function: item card
                     ShoppingItemCard(item, onToggleTickItem, onDeleteItem)
+
+                    // Margin bottom
                     Spacer(modifier = Modifier.height(8.dp))
                 }
             }
         }
 
-        // Form input new item
-        InputItemContainer(onAddItem)
+        // Composable function: Form input container
+        FormInputContainer(onAddItem)
     }
 }
 
@@ -71,9 +76,14 @@ fun ShoppingItemCard(
     onDeleteItem: (ShoppingItem) -> Unit
 ) {
     val swipeToDismissState = rememberDismissState(
-        confirmStateChange = {
-            if (it == DismissValue.DismissedToEnd) onDeleteItem(shoppingItem)
-            it == DismissValue.DismissedToEnd
+        confirmStateChange = { dismissValue ->
+            val isItemDismissed = dismissValue == DismissValue.DismissedToEnd
+
+            // delete only if item is swiped until the end/right side of screen
+            if (isItemDismissed) onDeleteItem(shoppingItem)
+
+            // return Boolean value where we considered item is dismissed
+            isItemDismissed
         }
     )
 
@@ -122,10 +132,10 @@ fun ShoppingItemCard(
 }
 
 @Composable
-fun InputItemContainer(
+fun FormInputContainer(
     onAddItem: (ShoppingItem) -> Unit
 ) {
-    var itemName by remember { mutableStateOf("") }
+    var newItem by remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
 
     Row(
@@ -134,18 +144,23 @@ fun InputItemContainer(
             .height(IntrinsicSize.Min)
             .padding(8.dp)
     ) {
+        // Field input
         TextField(
             label = { Text("Item belanja baru") },
             singleLine = true,
-            onValueChange = { newValue -> itemName = newValue },
-            value = itemName
+            onValueChange = { newItem = it },
+            value = newItem
         )
+
+        // Margin / spacer
         Spacer(modifier = Modifier.width(8.dp))
+
+        // Button add item
         Button(
-            enabled = itemName.isNotBlank(),
+            enabled = newItem.isNotBlank(),
             onClick = {
-                onAddItem(ShoppingItem(name = itemName))
-                itemName = ""
+                onAddItem(ShoppingItem(name = newItem))
+                newItem = ""
                 focusManager.clearFocus()
             },
             modifier = Modifier.fillMaxHeight()
@@ -159,9 +174,8 @@ fun InputItemContainer(
 @Preview(showBackground = true)
 @Composable
 fun PreviewShoppingListScreen() {
-
     val previewItems = List(10) { index ->
-        ShoppingItem(name = "Item Preview $index")
+        ShoppingItem(id = index, name = "Item Preview $index")
     }
 
     MaterialTheme {
