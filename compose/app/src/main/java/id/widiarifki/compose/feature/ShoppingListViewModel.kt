@@ -18,7 +18,7 @@ class ShoppingListViewModel(
 
     // variables that hold state
     var isLoading by mutableStateOf(true)
-    val shoppingItems = getItems()
+    val shoppingItems: LiveData<List<ShoppingItem>> = getItems()
 
     private fun getItems(): LiveData<List<ShoppingItem>> {
         isLoading = true

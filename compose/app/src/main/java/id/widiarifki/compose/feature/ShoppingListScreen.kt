@@ -28,10 +28,10 @@ fun ShoppingListScreen(
     onDeleteItem: (ShoppingItem) -> Unit
 ) {
 
-    // Content container
+    // Content Container
     Column(modifier = Modifier.fillMaxHeight()) {
-
         val expandHeight = Modifier.weight(1f)
+
         when {
             isLoading -> {
                 LoadingIndicator(expandHeight)
@@ -99,14 +99,14 @@ fun ShoppingItemCard(
     onToggleTickItem: (ShoppingItem) -> Unit,
     onDeleteItem: (ShoppingItem) -> Unit
 ) {
-    val swipeToDismissState = rememberDismissState(
+    val swiperState = rememberDismissState(
         confirmStateChange = { dismissValue ->
             val isItemDismissed = dismissValue == DismissValue.DismissedToEnd
 
-            // delete only if item is swiped until the end/right side of screen
+            // event delete hanya ketika item digeser sampai ujung kanan (DismissedToEnd)
             if (isItemDismissed) onDeleteItem(shoppingItem)
 
-            // return Boolean value where we considered item is dismissed
+            // definisikan Boolean value, dimana kita menganggap swipe akan merubah state
             isItemDismissed
         }
     )
@@ -117,9 +117,9 @@ fun ShoppingItemCard(
     }
 
     SwipeToDismiss(
-        state = swipeToDismissState,
+        state = swiperState,
         background = {
-            // View showing in the back of the swiped card
+            // UI yg tampil saat item digeser
             Box(
                 modifier = Modifier.fillMaxHeight(),
                 contentAlignment = Alignment.CenterStart
@@ -137,7 +137,7 @@ fun ShoppingItemCard(
                     .fillMaxWidth(1f)
                     .padding(10.dp)
             ) {
-                // Text
+                // Teks item belanja
                 Text(
                     text = shoppingItem.name,
                     style = textStyle,
