@@ -1,6 +1,10 @@
 package id.widiarifki.compose.feature
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import id.widiarifki.compose.data.entity.ShoppingItem
@@ -12,8 +16,17 @@ class ShoppingListViewModel(
     private val repository: ShoppingItemRepository = ShoppingItemRepository()
 ) : ViewModel() {
 
-    // variables that has state
-    val shoppingItems: LiveData<List<ShoppingItem>> = repository.allShoppingItems
+    // variables that hold state
+    var isLoading by mutableStateOf(true)
+    val shoppingItems = getItems()
+
+    private fun getItems(): LiveData<List<ShoppingItem>> {
+        isLoading = true
+        return Transformations.map(repository.allShoppingItems) { items ->
+            isLoading = false
+            items
+        }
+    }
 
     // event: add item
     fun addItem(item: ShoppingItem) {

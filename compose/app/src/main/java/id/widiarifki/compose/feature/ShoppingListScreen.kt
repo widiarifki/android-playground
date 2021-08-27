@@ -21,50 +21,74 @@ import id.widiarifki.compose.data.entity.ShoppingItem
 @ExperimentalMaterialApi
 @Composable
 fun ShoppingListScreen(
+    isLoading: Boolean,
     shoppingItems: List<ShoppingItem>,
     onAddItem: (ShoppingItem) -> Unit,
     onToggleTickItem: (ShoppingItem) -> Unit,
     onDeleteItem: (ShoppingItem) -> Unit
 ) {
+
     // Content container
     Column(modifier = Modifier.fillMaxHeight()) {
-        // Empty state / List ?
-        if (shoppingItems.isEmpty()) {
-            // Empty state
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Yah, belum ada item belanja!",
-                    style = MaterialTheme.typography.h5,
-                    textAlign = TextAlign.Center
-                )
-            }
-        } else {
-            // List
-            LazyColumn(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(8.dp)
-            ) {
-                items(
-                    items = shoppingItems,
-                    key = { item -> item.id }
-                ) { item ->
-                    // Composable function: item card
-                    ShoppingItemCard(item, onToggleTickItem, onDeleteItem)
 
-                    // Margin bottom
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
+        val expandHeight = Modifier.weight(1f)
+        when {
+            isLoading -> {
+                LoadingIndicator(expandHeight)
+            }
+            !isLoading && shoppingItems.isEmpty() -> {
+                EmptyState(expandHeight)
+            }
+            !isLoading && shoppingItems.isNotEmpty() -> {
+                ShoppingList(
+                    shoppingItems = shoppingItems,
+                    onToggleTickItem = onToggleTickItem,
+                    onDeleteItem = onDeleteItem,
+                    modifier = expandHeight
+                )
             }
         }
 
-        // Composable function: Form input container
-        FormInputContainer(onAddItem)
+        if (!isLoading) FormInputContainer(onAddItem)
+    }
+}
+
+@Composable
+fun LoadingIndicator(modifier: Modifier = Modifier) {
+    Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator(color = MaterialTheme.colors.primary)
+    }
+}
+
+@Composable
+fun EmptyState(modifier: Modifier = Modifier) {
+    Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        Text(
+            text = "Yah, belum ada item belanja!",
+            style = MaterialTheme.typography.h5,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@ExperimentalMaterialApi
+@Composable
+fun ShoppingList(
+    shoppingItems: List<ShoppingItem>,
+    onToggleTickItem: (ShoppingItem) -> Unit,
+    onDeleteItem: (ShoppingItem) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(modifier.padding(8.dp)) {
+        items(
+            items = shoppingItems,
+            key = { item -> item.id }
+        ) { item ->
+            // Item card
+            ShoppingItemCard(item, onToggleTickItem, onDeleteItem)
+            // Space between card
+            Spacer(modifier = Modifier.height(8.dp))
+        }
     }
 }
 
@@ -95,6 +119,7 @@ fun ShoppingItemCard(
     SwipeToDismiss(
         state = swipeToDismissState,
         background = {
+            // View showing in the back of the swiped card
             Box(
                 modifier = Modifier.fillMaxHeight(),
                 contentAlignment = Alignment.CenterStart
@@ -180,7 +205,11 @@ fun PreviewShoppingListScreen() {
 
     MaterialTheme {
         ShoppingListScreen(
-            previewItems, {}, {}, {}
+            isLoading = true,
+            shoppingItems = previewItems,
+            onAddItem = {},
+            onToggleTickItem = {},
+            onDeleteItem = {}
         )
     }
 }
